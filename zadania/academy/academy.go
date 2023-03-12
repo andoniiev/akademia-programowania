@@ -1,17 +1,27 @@
 package academy
 
+import "math"
+
 type Student struct {
-	Name      string
-	Grades    []int
-	Project   int
-	Attendace []bool
+	Name       string
+	Grades     []int
+	Project    int
+	Attendance []bool
 }
 
 // AverageGrade returns an average grade given a
 // slice containing all grades received during a
 // semester, rounded to the nearest integer.
 func AverageGrade(grades []int) int {
-	panic("not implemented")
+	if len(grades) == 0 {
+		return 0
+	}
+	var sum float64 = 0.0
+	for _, grade := range grades {
+		sum += float64(grade)
+	}
+
+	return int(math.Round(sum / float64(len(grades))))
 }
 
 // AttendancePercentage returns a percentage of class
@@ -22,7 +32,16 @@ func AverageGrade(grades []int) int {
 // floating-point number ranging from  0 to 1,
 // with 2 digits of precision.
 func AttendancePercentage(attendance []bool) float64 {
-	panic("not implemented")
+	attendedClasses := 0
+	totalClasses := len(attendance)
+
+	for _, attend := range attendance {
+		if attend {
+			attendedClasses++
+		}
+	}
+
+	return float64(attendedClasses) / float64(totalClasses)
 }
 
 // FinalGrade returns a final grade achieved by a student,
@@ -37,12 +56,33 @@ func AttendancePercentage(attendance []bool) float64 {
 // decreased by 1. If the student's attendance is below 60%, average
 // grade is 1 or project grade is 1, the final grade is 1.
 func FinalGrade(s Student) int {
-	panic("not implemented")
+	projectGrade := s.Project
+	semesterGrade := AverageGrade(s.Grades)
+
+	attendancePercentage := AttendancePercentage(s.Attendance)
+
+	if attendancePercentage < 0.6 || semesterGrade == 1 || projectGrade == 1 {
+		return 1
+	} else if attendancePercentage < 0.8 {
+		finalGrade := (projectGrade + semesterGrade) / 2
+		finalGrade -= 1
+		return int(math.Round(float64(finalGrade)))
+	} else {
+		finalGrade := int(math.Round((float64(projectGrade + semesterGrade)) / 2))
+		return finalGrade
+	}
 }
 
 // GradeStudents returns a map of final grades for a given slice of
 // Student structs. The key is a student's name and the value is a
 // final grade.
 func GradeStudents(students []Student) map[string]uint8 {
-	panic("not implemented")
+	grades := make(map[string]uint8)
+
+	for _, student := range students {
+		finalGrade := FinalGrade(student)
+		grades[student.Name] = uint8(finalGrade)
+	}
+
+	return grades
 }
